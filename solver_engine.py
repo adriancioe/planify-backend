@@ -266,23 +266,7 @@ def resolver():
         obj.append(sn[dia] * wi * 3)   # déficit (×3 peor que exceso)
         obj.append(sp[dia] * wi * 1)   # exceso
 
-    # ── Objetivo P500: equidad de tipos de contrato por día ───────────────────
-    # Cada día debe tener proporción similar de fulltime/parcial/reducida
-    total_emps = max(1, len(emps))
-    for dia in DIAS:
-        for gname, geids in grupos.items():
-            if not geids: continue
-            ratio   = len(geids) / total_emps
-            workers_g = [work[eid][dia] for eid in geids if sm[eid][dia] == 'disponible']
-            if not workers_g: continue
-            # Target proporcional: tgt_dia * ratio
-            tgt_d  = max(0, int(round(total_pd * dw[dia] / tw)))
-            tgt_g  = max(0, int(round(tgt_d * ratio)))
-            sg_neg = model.NewIntVar(0, len(geids), f'sgn_{gname[:2]}_{dia[:2]}')
-            sg_pos = model.NewIntVar(0, len(geids), f'sgp_{gname[:2]}_{dia[:2]}')
-            model.Add(sum(workers_g) + sg_neg - sg_pos == min(tgt_g, len(workers_g)))
-            obj.append(sg_neg * 500 * 2)   # déficit de un grupo: penalización
-            obj.append(sg_pos * 500 * 1)
+
 
     # ── Objetivo P300: fines de semana equitativos ─────────────────────────────
     for emp in emps:
@@ -291,7 +275,7 @@ def resolver():
         # Penalizar trabajar Sábado o Domingo si le toca librar este fin
         for dia in ['Sábado', 'Domingo']:
             if sm[eid][dia] == 'disponible':
-                obj.append(work[eid][dia] * 300)
+                obj.append(work[eid][dia] * 30)  # Reducido: no debe dominar sobre demanda
 
     # ── Objetivo P200: rotación (no repetir mismos días libres) ───────────────
     for emp in emps:
