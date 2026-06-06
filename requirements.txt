@@ -1,4 +1,4 @@
-flask
-flask-cors
-ortools
-gunicorn
+flask==3.0.3
+flask-cors==4.0.1
+ortools==9.10.4067
+gunicorn==22.0.0
